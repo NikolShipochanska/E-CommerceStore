@@ -23,10 +23,18 @@ namespace E_CommerceStore.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? categoryId)
         {
-            var appDbContext = _context.Products.Include(p => p.Category);
-            return View(await appDbContext.ToListAsync());
+            var products = _context.Products.Include(p => p.Category).AsQueryable();
+
+            if (categoryId.HasValue)
+            {
+                products = products.Where(p => p.CategoryId == categoryId.Value);
+                ViewBag.SelectedCategoryId = categoryId.Value;
+            }
+
+            ViewBag.Categories = await _context.Categories.ToListAsync();
+            return View(await products.ToListAsync());
         }
 
         // GET: Products/Details/5
@@ -47,6 +55,8 @@ namespace E_CommerceStore.Controllers
 
             return View(product);
         }
+
+       
 
         [Authorize(Roles = "Admin")]
 
