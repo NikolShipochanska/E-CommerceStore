@@ -122,9 +122,15 @@ namespace E_CommerceStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,CategoryId,StockQuantity")] Product product, IFormFile? imageFile)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,CategoryId,StockQuantity,ImageFileName")] Product product, IFormFile? imageFile)
         {
             if (id != product.Id)
+            {
+                return NotFound();
+            }
+
+            var existingProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+            if (existingProduct == null)
             {
                 return NotFound();
             }
@@ -133,6 +139,7 @@ namespace E_CommerceStore.Controllers
             {
                 try
                 {
+                    // If there is new image uploaded
                     if (imageFile != null && imageFile.Length > 0)
                     {
                         string uploadDir = Path.Combine(_environment.WebRootPath, "images");
@@ -146,8 +153,24 @@ namespace E_CommerceStore.Controllers
                             await imageFile.CopyToAsync(stream);
                         }
 
+                        // Deleting the old image if there is
+                        if (!string.IsNullOrEmpty(existingProduct.ImageFileName))
+                        {
+                            string oldImagePath = Path.Combine(_environment.WebRootPath, existingProduct.ImageFileName.TrimStart('/'));
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                        }
+
                         product.ImageFileName = "/images/" + uniqueFileName;
                     }
+                    else
+                    {
+                        // If there is no new image uploaded - keep the old one
+                        product.ImageFileName = existingProduct.ImageFileName;
+                    }
+
                     _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
@@ -162,11 +185,14 @@ namespace E_CommerceStore.Controllers
                         throw;
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
             return View(product);
         }
+
 
         // GET: Products/Delete/5
         public async Task<IActionResult> Delete(int? id)
