@@ -1,4 +1,8 @@
-﻿@model IEnumerable<E_CommerceStore.Models.Product>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
+@inject IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<E_CommerceStore.Models.Product>
 
 @{
     ViewData["Title"] = "Products";
@@ -6,9 +10,17 @@
 
 <h1>Products</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-success">Create New Product</a>
-</p>
+@if (SignInManager.IsSignedIn(User))
+{
+    var currentUser = await UserManager.GetUserAsync(User);
+    if (await UserManager.IsInRoleAsync(currentUser, "Admin"))
+    {
+        <p>
+            <a asp-action="Create" class="btn btn-success">Create New</a>
+        </p>
+    }
+}
+
 
 <div class="row row-cols-1 row-cols-md-3 g-4">
     @foreach (var product in Model)
@@ -35,7 +47,14 @@
                     <span class="fw-bold">@product.Price.ToString("C")</span>
                     <div>
                         <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary btn-sm">View</a>
-                        <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-secondary btn-sm">Edit</a>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            var currentUser = await UserManager.GetUserAsync(User);
+                            if (await UserManager.IsInRoleAsync(currentUser, "Admin"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-secondary btn-sm">Edit</a>
+                            }
+                        }
                     </div>
                 </div>
             </div>

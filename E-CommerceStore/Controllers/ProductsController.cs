@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using E_CommerceStore.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace E_CommerceStore.Controllers
 {
+    
     public class ProductsController : Controller
     {
         private readonly AppDbContext _context;
@@ -46,6 +48,8 @@ namespace E_CommerceStore.Controllers
             return View(product);
         }
 
+        [Authorize(Roles = "Admin")]
+
         // GET: Products/Create
         public IActionResult Create()
         {
@@ -65,7 +69,7 @@ namespace E_CommerceStore.Controllers
                 if (imageFile != null && imageFile.Length > 0)
                 {
                     string uploadDir = Path.Combine(_environment.WebRootPath, "images");
-                    Directory.CreateDirectory(uploadDir); // ако не съществува папката
+                    Directory.CreateDirectory(uploadDir); 
 
                     string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
                     string filePath = Path.Combine(uploadDir, uniqueFileName);
