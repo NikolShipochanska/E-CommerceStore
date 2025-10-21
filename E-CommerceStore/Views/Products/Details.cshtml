@@ -5,6 +5,18 @@
 }
 
 <h1>Details</h1>
+@if (!string.IsNullOrEmpty(Model.ImageFileName))
+{
+    <div class="text-center mb-3">
+        <img src="@Model.ImageFileName" alt="@Model.Name" class="img-fluid rounded" style="max-width:300px;" />
+    </div>
+}
+else
+{
+    <div class="text-center mb-3 text-muted">
+        No image available
+    </div>
+}
 
 <div>
     <h4>Product</h4>

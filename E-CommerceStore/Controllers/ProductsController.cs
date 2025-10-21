@@ -12,10 +12,12 @@ namespace E_CommerceStore.Controllers
     public class ProductsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(AppDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         // GET: Products
@@ -56,10 +58,26 @@ namespace E_CommerceStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,CategoryId,StockQuantity")] Product product)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,CategoryId,StockQuantity")] Product product, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    string uploadDir = Path.Combine(_environment.WebRootPath, "images");
+                    Directory.CreateDirectory(uploadDir); // ако не съществува папката
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                    string filePath = Path.Combine(uploadDir, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+
+                    product.ImageFileName = "/images/" + uniqueFileName;
+                }
+
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -90,7 +108,7 @@ namespace E_CommerceStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,CategoryId,StockQuantity")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,CategoryId,StockQuantity")] Product product, IFormFile? imageFile)
         {
             if (id != product.Id)
             {
@@ -101,6 +119,21 @@ namespace E_CommerceStore.Controllers
             {
                 try
                 {
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        string uploadDir = Path.Combine(_environment.WebRootPath, "images");
+                        Directory.CreateDirectory(uploadDir);
+
+                        string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                        string filePath = Path.Combine(uploadDir, uniqueFileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imageFile.CopyToAsync(stream);
+                        }
+
+                        product.ImageFileName = "/images/" + uniqueFileName;
+                    }
                     _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
