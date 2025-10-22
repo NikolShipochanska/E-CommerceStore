@@ -18,7 +18,7 @@
                 @foreach (var category in ViewBag.Categories)
                 {
                     <option value="@category.Id"
-                            selected="@(ViewBag.SelectedCategoryId != null && (int)ViewBag.SelectedCategoryId == category.Id)">
+                    selected="@(ViewBag.SelectedCategoryId != null && (int)ViewBag.SelectedCategoryId == category.Id)">
                         @category.Name
                     </option>
                 }
@@ -64,6 +64,15 @@
                     <span class="fw-bold">@product.Price.ToString("C")</span>
                     <div>
                         <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary btn-sm">View</a>
+                        <form asp-controller="ShoppingCarts" asp-action="AddToCart" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@product.Id" />
+
+                            <div class="input-group input-group-sm" style="width: 140px;">
+                                <input type="number" name="quantity" value="1" min="1" max="@product.StockQuantity"
+                                       class="form-control text-center" style="max-width: 60px;" />
+                                <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                            </div>
+                        </form>
                         @if (SignInManager.IsSignedIn(User))
                         {
                             var currentUser = await UserManager.GetUserAsync(User);

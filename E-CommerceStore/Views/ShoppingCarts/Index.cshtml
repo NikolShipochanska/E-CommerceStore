@@ -1,0 +1,54 @@
+﻿@model E_CommerceStore.Models.ShoppingCart
+
+@{
+    ViewData["Title"] = "My Cart";
+}
+
+<h1>My Cart</h1>
+
+@if (Model == null || !Model.Items.Any())
+{
+    <p>Your cart is empty.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>@item.Product.Price.ToString("C")</td>
+                    <td>@item.Quantity</td>
+                    <td>@((item.Product.Price * item.Quantity).ToString("C"))</td>
+                    <td>
+                        <form asp-controller="ShoppingCarts" asp-action="Delete" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@item.Product.Id" />
+
+                            <div class="input-group input-group-sm" style="width: 140px;">
+                                <input type="number" name="quantity" value="1" min="1" max="@item.Quantity"
+                                       class="form-control text-center" style="max-width: 60px;" />
+                                <button type="submit" class="btn btn-primary btn-sm">Remove</button>
+                            </div>
+                        </form>
+                       
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>
+        <strong>Total:</strong>
+        @Model.Items.Sum(i => i.Product.Price * i.Quantity).ToString("C")
+    </h4>
+}
