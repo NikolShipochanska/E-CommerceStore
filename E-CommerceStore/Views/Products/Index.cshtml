@@ -60,17 +60,21 @@
                     <p class="card-text">@product.Description</p>
                 </div>
 
-                <div class="card-footer d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">@product.Price.ToString("C")</span>
-                    <div>
-                        <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary btn-sm">View</a>
-                        <form asp-controller="ShoppingCarts" asp-action="AddToCart" method="post" class="d-inline">
-                            <input type="hidden" name="productId" value="@product.Id" />
+                <div class="card-footer d-flex justify-content-between align-items-start">
+                    <div class="d-flex flex-column">
+                        <span class="fw-bold">@product.Price.ToString("C")</span>
+                        <span class="fw-bold">Available quantity: @product.StockQuantity</span>
+                    </div>
 
-                            <div class="input-group input-group-sm" style="width: 140px;">
+                    <div class="d-flex flex-column align-items-end">
+                        <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary btn-sm mb-2">View</a>
+
+                        <form asp-controller="ShoppingCarts" asp-action="AddToCart" method="post">
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <div class="input-group input-group-sm">
                                 <input type="number" name="quantity" value="1" min="1" max="@product.StockQuantity"
                                        class="form-control text-center" style="max-width: 60px;" />
-                                <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                                <button type="submit" class="btn btn-primary btn-sm">Add To Cart</button>
                             </div>
                         </form>
                         @if (SignInManager.IsSignedIn(User))
