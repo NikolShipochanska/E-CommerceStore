@@ -44,6 +44,10 @@ else
                     </td>
                 </tr>
             }
+
+            <form asp-controller="Orders" asp-action="MakeOrder" method="post">
+                <button type="submit" class="btn btn-primary btn-sm">Make order</button>
+            </form>
         </tbody>
     </table>
 
